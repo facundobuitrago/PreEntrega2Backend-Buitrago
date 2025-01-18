@@ -42,7 +42,7 @@
     <script>
         const socket = io();
 
-        // Listener para eliminar productos
+        // Listener para eliminar 
         document.addEventListener("click", (event) => {
             if (event.target.classList.contains("delete-btn")) {
                 const productId = event.target.closest("li").dataset.productId;
@@ -51,7 +51,7 @@
             }
         });
 
-        // Listener para agregar productos
+        // Listener para agregar
         const addProductForm = document.getElementById("add-product-form");
         addProductForm.addEventListener("submit", (e) => {
             e.preventDefault();
@@ -70,13 +70,13 @@
             console.log("Producto agregado:", newProduct);
             socket.emit("add-product", newProduct);
 
-            addProductForm.reset(); // Limpiar formulario
+            addProductForm.reset(); // limpio formulario
         });
 
-        // Listener para recibir la lista actualizada de productos
+        // Ppara recibir la lista actualizada de productos
         socket.on("productos-actuales", (productos) => {
             const productsList = document.getElementById("products-list");
-            productsList.innerHTML = ""; // Limpiar la lista
+            productsList.innerHTML = ""; // limpio la lista
             productos.forEach((producto) => {
                 const li = document.createElement("li");
                 li.dataset.productId = producto.id;

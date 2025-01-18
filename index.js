@@ -91,9 +91,9 @@ io.on("connection", (socket) => {
     const productos = readProducts();
     const index = productos.findIndex((producto) => producto.id === productId);
     if (index !== -1) {
-      productos.splice(index, 1); // Eliminar producto de la lista
-      saveProducts(productos); // Guardar la lista actualizada en el archivo
-      io.emit("productos-actuales", productos); // Emitir lista actualizada
+      productos.splice(index, 1); 
+      saveProducts(productos); 
+      io.emit("productos-actuales", productos);
       console.log("Producto eliminado y lista actualizada emitida.");
     } else {
       console.log(`Producto con ID ${productId} no encontrado.`);
