@@ -1,0 +1,23 @@
+[
+  {
+    "nombre": "JUEGO",
+    "descripcion": "MARIO KART ",
+    "precio": 30000,
+    "stock": 6,
+    "id": "1737235258800"
+  },
+  {
+    "nombre": "Consola",
+    "descripcion": "Nintendo Switch ",
+    "precio": 40000,
+    "stock": 3,
+    "id": "1737235982228"
+  },
+  {
+    "nombre": "Joystick",
+    "descripcion": "Mando de Xbox",
+    "precio": 23000,
+    "stock": 3,
+    "id": "1737236386361"
+  }
+]

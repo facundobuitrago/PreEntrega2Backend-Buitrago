@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap" rel="stylesheet">
+</head>
+<style>
+    body{ font-family: "Fjalla One", serif;}
+</style>
+<body>
+    
+    <h1>Lista de Productos</h1>
+    <ul id="products-list" style="display: flex; align-items: baseline; flex-wrap: wrap; justify-content: space-between;">
+        {{#each products}}
+        <li data-product-id="{{id}}">
+            <h2>{{nombre}}</h2>
+            <p>{{descripcion}}</p>
+            <p>Precio: ${{precio}}</p>
+            <p>Cantidad: {{stock}}</p>
+            <button class="delete-btn">Eliminar</button>
+        </li>
+        {{/each}}
+    </ul>
+    <form id="add-product-form">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre"><br><br>
+        <label for="descripcion">Descripción:</label>
+        <input type="text" id="descripcion" name="descripcion"><br><br>
+        <label for="precio">Precio:</label>
+        <input type="number" id="precio" name="precio"><br><br>
+        <label for="stock">Cantidad:</label>
+        <input type="number" id="stock" name="stock"><br><br>
+        <button id="add-product-button">Agregar</button>
+    </form>
+    <a href="/real-time-products">
+        <button style="background-color: teal; color: white; border: none; padding: 10px 20px; cursor: pointer;">
+            Ver Productos en Tiempo Real
+        </button>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        // Listener para eliminar productos
+        document.addEventListener("click", (event) => {
+            if (event.target.classList.contains("delete-btn")) {
+                const productId = event.target.closest("li").dataset.productId;
+                console.log("Eliminando producto con ID:", productId);
+                socket.emit("delete-product", productId);
+            }
+        });
+
+        // Listener para agregar productos
+        const addProductForm = document.getElementById("add-product-form");
+        addProductForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const nombre = document.getElementById("nombre").value;
+            const descripcion = document.getElementById("descripcion").value;
+            const precio = parseFloat(document.getElementById("precio").value);
+            const stock = parseInt(document.getElementById("stock").value);
+
+            if (!nombre || !descripcion || isNaN(precio) || isNaN(stock)) {
+                alert("Por favor, completa todos los campos correctamente.");
+                return;
+            }
+
+            const newProduct = { nombre, descripcion, precio, stock };
+            console.log("Producto agregado:", newProduct);
+            socket.emit("add-product", newProduct);
+
+            addProductForm.reset(); // Limpiar formulario
+        });
+
+        // Listener para recibir la lista actualizada de productos
+        socket.on("productos-actuales", (productos) => {
+            const productsList = document.getElementById("products-list");
+            productsList.innerHTML = ""; // Limpiar la lista
+            productos.forEach((producto) => {
+                const li = document.createElement("li");
+                li.dataset.productId = producto.id;
+                li.innerHTML = `
+                    <h2>${producto.nombre}</h2>
+                    <p>${producto.descripcion}</p>
+                    <p>Precio: $${producto.precio}</p>
+                    <p>Cantidad: ${producto.stock}</p>
+                    <button class="delete-btn">Eliminar</button>
+                `;
+                productsList.appendChild(li);
+            });
+        });
+    </script>
+</body>
+</html>
+

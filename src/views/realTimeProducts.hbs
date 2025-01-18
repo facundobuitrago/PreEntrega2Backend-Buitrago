@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap" rel="stylesheet">
+</head>
+<style>
+    body{ font-family: "Fjalla One", serif;}
+</style>
+<body>
+    <h1>Productos en Tiempo Real</h1>
+    <a href="/" style="background-color: teal; color: white; border: none; padding: 10px 20px; cursor: pointer;">
+    Ir al Home
+</a>
+    <ul id="products-list">
+        {{#each products}}
+            <li data-product-id="{{id}}">
+                <h2>{{nombre}}</h2>
+                <p>{{descripcion}}</p>
+                <p>Precio: ${{precio}}</p>
+                <p>Stock: {{stock}}</p>
+                <button class="delete-btn">Eliminar</button>
+                <button class="reduce-stock-btn" data-amount="1">Reducir Stock</button>
+            </li>
+        {{/each}}
+    </ul>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        // Actualizar la lista de productos
+        socket.on("productos-actuales", (products) => {
+            const productsList = document.getElementById("products-list");
+            productsList.innerHTML = "";
+            products.forEach((product) => {
+                const productHTML = `
+                    <li data-product-id="${product.id}">
+                        <h2>${product.nombre}</h2>
+                        <p>${product.descripcion}</p>
+                        <p>Precio: $${product.precio}</p>
+                        <p>Cantidad: ${product.stock}</p>
+                        <button class="delete-btn">Eliminar</button>
+                    </li>
+                `;
+                productsList.innerHTML += productHTML;
+            });
+            attachEventListeners(); // Reasignar eventos
+        });
+
+        // Emitir eliminación de producto
+        const attachEventListeners = () => {
+            const deleteButtons = document.querySelectorAll(".delete-btn");
+            deleteButtons.forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    const productId = btn.closest("li").dataset.productId;
+                    socket.emit("delete-product", productId);
+                });
+            });
+
+            const reduceStockButtons = document.querySelectorAll(".reduce-stock-btn");
+            reduceStockButtons.forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    const productId = btn.closest("li").dataset.productId;
+                    const amount = parseInt(btn.dataset.amount, 10);
+                    socket.emit("reduce-stock", { productId, amount });
+                });
+            });
+        };
+
+        attachEventListeners();
+    </script>
+    
+</body>
+</html>

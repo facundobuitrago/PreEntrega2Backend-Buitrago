@@ -1,0 +1,13 @@
+# Ignorar dependencias
+node_modules/
+
+# Ignorar archivos de datos
+data/*.json
+
+# Ignorar configuraciones del editor
+.vscode/
+
+# Ignorar archivos temporales
+.env
+.DS_Store
+README.md
