@@ -11,8 +11,6 @@ socket.on("productos-actuales", (productos) => {
   });
 });
 
-
-
 // Función para crear un elemento de producto
 function createProduct(producto) {
   const li = document.createElement("li");
@@ -26,11 +24,10 @@ function createProduct(producto) {
     <button class="delete-btn">Eliminar</button>
   `; return li;
 
-  
 }
 const deleteButton = li.querySelector(".delete-btn");
-  deleteButton.addEventListener("click", () => {
-    socket.emit("delete-product", producto.id); // Enviar evento al servidor
-  });
+deleteButton.addEventListener("click", () => {
+  socket.emit("delete-product", producto.id); // Enviar evento al servidor
+});
 
-  return li;
+return li;
