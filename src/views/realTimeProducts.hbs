@@ -15,7 +15,7 @@
     <a href="/" style="background-color: teal; color: white; border: none; padding: 10px 20px; cursor: pointer;">
     Ir al Home
 </a>
-    <ul id="products-list">
+    <ul id="products-list" style="display: flex; align-items: baseline; flex-wrap: wrap; justify-content: space-between;">
         {{#each products}}
             <li data-product-id="{{id}}">
                 <h2>{{nombre}}</h2>
@@ -23,7 +23,6 @@
                 <p>Precio: ${{precio}}</p>
                 <p>Stock: {{stock}}</p>
                 <button class="delete-btn">Eliminar</button>
-                <button class="reduce-stock-btn" data-amount="1">Reducir Stock</button>
             </li>
         {{/each}}
     </ul>
@@ -60,17 +59,7 @@
                     socket.emit("delete-product", productId);
                 });
             });
-
-            const reduceStockButtons = document.querySelectorAll(".reduce-stock-btn");
-            reduceStockButtons.forEach((btn) => {
-                btn.addEventListener("click", () => {
-                    const productId = btn.closest("li").dataset.productId;
-                    const amount = parseInt(btn.dataset.amount, 10);
-                    socket.emit("reduce-stock", { productId, amount });
-                });
-            });
-        };
-
+            }
         attachEventListeners();
     </script>
     
