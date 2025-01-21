@@ -55,7 +55,7 @@ app.get("/", (req, res) => {
     const products = readProducts();
     res.render("home", { title: "Productos", products });
   } catch (error) {
-    console.error("Error rendering home view:", error);
+    console.error("Error de renderizado home view:", error);
     res.status(500).send("Error interno del servidor.");
   }
 });
@@ -68,33 +68,29 @@ app.get("/real-time-products", (req, res) => {
       products,
     });
   } catch (error) {
-    console.error("Error rendering real-time-products view:", error);
+    console.error("Error de renderizado real-time-products view:", error);
     res.status(500).send("Error interno del servidor.");
   }
 });
 
 // WebSocket config
 const server = app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server corriendo en http://localhost:${PORT}`);
 });
 
 const io = new Server(server);
 io.on("connection", (socket) => {
-  console.log("Nuevo cliente conectado:", socket.id);
-
   // Enviar los productos actuales al cliente cuando se conecta
   socket.emit("productos-actuales", readProducts());
 
   // Manejar eliminación de productos
   socket.on("delete-product", (productId) => {
-    console.log("Evento delete-product recibido para ID:", productId);
     const productos = readProducts();
     const index = productos.findIndex((producto) => producto.id === productId);
     if (index !== -1) {
       productos.splice(index, 1); 
       saveProducts(productos); 
       io.emit("productos-actuales", productos);
-      console.log("Producto eliminado y lista actualizada emitida.");
     } else {
       console.log(`Producto con ID ${productId} no encontrado.`);
     }
@@ -102,7 +98,6 @@ io.on("connection", (socket) => {
 
   // Manejar creación de productos
   socket.on("add-product", (newProduct) => {
-    console.log("Evento add-product recibido:", newProduct);
     const productos = readProducts();
     productos.push({ ...newProduct, id: Date.now().toString() }); // Agregar ID único
     saveProducts(productos);

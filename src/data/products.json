@@ -1,12 +1,5 @@
 [
   {
-    "nombre": "JUEGO",
-    "descripcion": "MARIO KART ",
-    "precio": 30000,
-    "stock": 6,
-    "id": "1737235258800"
-  },
-  {
     "nombre": "Consola",
     "descripcion": "Nintendo Switch ",
     "precio": 40000,
@@ -19,5 +12,12 @@
     "precio": 23000,
     "stock": 3,
     "id": "1737236386361"
+  },
+  {
+    "nombre": "Red Dead",
+    "descripcion": "Juego",
+    "precio": 30000,
+    "stock": 3,
+    "id": "1737418683258"
   }
 ]

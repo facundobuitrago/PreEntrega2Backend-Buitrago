@@ -35,7 +35,8 @@ const saveCarts = (carts) => {
 router.post('/', (req, res) => {
     const carts = readCarts();
     const newCart = {
-        id: carts.length > 0 ? Math.max(...carts.map(c => c.id)) + 1 : 1, // Asignación de ID único
+        id: carts.length > 0 ? Math.max(...carts.map(c => c.id)) + 1 : 1, 
+        // Asignación de ID único
         products: []
     };
     carts.push(newCart);
