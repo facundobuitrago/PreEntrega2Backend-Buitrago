@@ -20,12 +20,13 @@ const productSchema = new mongoose.Schema({
   id: String,
 });
 
-const Product = mongoose.model('Product', productSchema);
-
+// Aplicar el plugin de paginación al esquema
 productSchema.plugin(mongoosePaginate);
 
-// Insertar los productos
+// Definir el modelo
+const Product = mongoose.model('Product', productSchema);
 
+// Insertar los productos
 const productos = [
   {
     nombre: "Consola",
@@ -52,14 +53,15 @@ const productos = [
 
 const agregarProductos = async () => {
   try {
-    await conectarDB(); 
-    await Product.insertMany(productos); 
+    await conectarDB();  // Asegúrate de que la base de datos esté conectada antes de insertar
+    await Product.insertMany(productos);  // Insertar los productos en la base de datos
     console.log('Productos agregados a la base de datos');
   } catch (error) {
     console.error('Error al agregar productos:', error);
   }
 };
 
+// Ejecutar la función para agregar productos
 agregarProductos();
 
 export default Product;

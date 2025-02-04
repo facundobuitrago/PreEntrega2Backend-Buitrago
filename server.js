@@ -14,7 +14,6 @@ import conectarDB from "./config/db.js";
 conectarDB();
 
 const app = express();
-const PORT = process.env.PORT || 8080;
 
 // Middleware
 app.use(morgan("dev"));
