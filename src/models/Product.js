@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import mongoosePaginate from 'mongoose-paginate-v2';
 
 // Conexión a la base de datos
 const conectarDB = async () => {
@@ -21,6 +22,8 @@ const productSchema = new mongoose.Schema({
 });
 
 const Product = mongoose.model('Product', productSchema);
+
+productSchema.plugin(mongoosePaginate);
 
 // Insertar los productos
 const productos = [

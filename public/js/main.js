@@ -25,9 +25,6 @@ function createProduct(producto) {
   `; return li;
 
 }
-const deleteButton = li.querySelector(".delete-btn");
-deleteButton.addEventListener("click", () => {
-  socket.emit("delete-product", producto.id); // Enviar evento al servidor
-});
+
 
 return li;

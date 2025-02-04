@@ -3,13 +3,39 @@ import Product from "../models/Product.js";
 
 const router = express.Router();
 
-// Obtener todos los productos
+// Obtener todos los productos con paginación
 router.get("/", async (req, res) => {
   try {
-    const productos = await Product.find();
-    res.json(productos);
+    // Obtener los parámetros de la consulta para la paginación (page y limit)
+    const { page = 1, limit = 10 } = req.query; // Página actual y límite de productos por página
+    
+    // Configuración de paginación
+    const options = {
+      page: parseInt(page),  // Página solicitada
+      limit: parseInt(limit),  // Límites de los resultados por página
+      lean: true,  // Hace la consulta más rápida
+    };
+    
+    // Realizar la paginación
+    const result = await Product.paginate({}, options);
+
+    // Construir el objeto de respuesta con la paginación
+    const response = {
+      status: "success",
+      payload: result.docs,  // Productos de la página solicitada
+      totalPages: result.totalPages,  // Total de páginas
+      prevPage: result.prevPage,  // Página anterior
+      nextPage: result.nextPage,  // Página siguiente
+      page: result.page,  // Página actual
+      hasPrevPage: result.hasPrevPage,  // Si hay página anterior
+      hasNextPage: result.hasNextPage,  // Si hay página siguiente
+      prevLink: result.hasPrevPage ? `/api/products?page=${result.prevPage}&limit=${limit}` : null,  // Enlace a la página anterior
+      nextLink: result.hasNextPage ? `/api/products?page=${result.nextPage}&limit=${limit}` : null,  // Enlace a la página siguiente
+    };
+
+    res.json(response);
   } catch (error) {
-    res.status(500).json({ mensaje: "Error al obtener productos" });
+    res.status(500).json({ mensaje: "Error al obtener productos", error });
   }
 });
 
