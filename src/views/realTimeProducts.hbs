@@ -5,31 +5,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{title}}</title>
-      <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap" rel="stylesheet">
 </head>
 <style>
     body{ font-family: "Fjalla One", serif;}
 </style>
 <body>
     <h1>Productos en Tiempo Real</h1>
-    <a href="/" style="background-color: teal; color: white; border: none; padding: 10px 20px; cursor: pointer;">
-    Ir al Home
-</a>
+    <a href="/" style="background-color: teal; color: white; border: none; padding: 10px 20px; cursor: pointer;">Ir al Home</a>
+
     <ul id="products-list" style="display: flex; align-items: baseline; flex-wrap: wrap; justify-content: space-between;">
         {{#each products}}
-            <li data-product-id="{{id}}">
+            <li data-product-id="{{id}}" style="width: 30%; margin-bottom: 20px; border: 1px solid #ddd; padding: 10px;">
                 <h2>{{nombre}}</h2>
                 <p>{{descripcion}}</p>
                 <p>Precio: ${{precio}}</p>
                 <p>Stock: {{stock}}</p>
-                <button class="delete-btn">Eliminar</button>
+                <button class="view-details-btn" onclick="window.location.href='/products/{{id}}'">Ver Detalles</button>
+                <button class="add-to-cart-btn" data-product-id="{{id}}">Agregar al Carrito</button>
             </li>
         {{/each}}
     </ul>
 
+    <!-- Paginación -->
+    <div id="pagination" style="text-align: center; margin-top: 20px;">
+        {{#if prevPage}}
+            <a href="/products?page={{prevPage}}" style="padding: 10px 20px; background-color: teal; color: white;">Anterior</a>
+        {{/if}}
+        {{#if nextPage}}
+            <a href="/products?page={{nextPage}}" style="padding: 10px 20px; background-color: teal; color: white;">Siguiente</a>
+        {{/if}}
+    </div>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
+
+        // Listener para agregar al carrito
+        document.addEventListener("click", (event) => {
+            if (event.target.classList.contains("add-to-cart-btn")) {
+                const productId = event.target.dataset.productId;
+                socket.emit("add-to-cart", productId);
+                alert(`Producto ${productId} agregado al carrito.`);
+            }
+        });
 
         // Actualizar la lista de productos
         socket.on("productos-actuales", (products) => {
@@ -42,26 +60,13 @@
                         <p>${product.descripcion}</p>
                         <p>Precio: $${product.precio}</p>
                         <p>Cantidad: ${product.stock}</p>
-                        <button class="delete-btn">Eliminar</button>
+                        <button class="view-details-btn" onclick="window.location.href='/products/${product.id}'">Ver Detalles</button>
+                        <button class="add-to-cart-btn" data-product-id="${product.id}">Agregar al Carrito</button>
                     </li>
                 `;
                 productsList.innerHTML += productHTML;
             });
-            attachEventListeners(); // Reasignar eventos
         });
-
-        // Emitir eliminación de producto
-        const attachEventListeners = () => {
-            const deleteButtons = document.querySelectorAll(".delete-btn");
-            deleteButtons.forEach((btn) => {
-                btn.addEventListener("click", () => {
-                    const productId = btn.closest("li").dataset.productId;
-                    socket.emit("delete-product", productId);
-                });
-            });
-            }
-        attachEventListeners();
     </script>
-    
 </body>
 </html>

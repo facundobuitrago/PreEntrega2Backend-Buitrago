@@ -53,15 +53,14 @@ const productos = [
 
 const agregarProductos = async () => {
   try {
-    await conectarDB();  // Asegúrate de que la base de datos esté conectada antes de insertar
-    await Product.insertMany(productos);  // Insertar los productos en la base de datos
+    await conectarDB(); 
+    await Product.insertMany(productos); 
     console.log('Productos agregados a la base de datos');
   } catch (error) {
     console.error('Error al agregar productos:', error);
   }
 };
 
-// Ejecutar la función para agregar productos
 agregarProductos();
 
 export default Product;
