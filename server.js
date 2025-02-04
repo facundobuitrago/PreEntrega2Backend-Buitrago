@@ -10,6 +10,7 @@ import cartsRoutes from "./src/routes/carts.js";
 import conectarDB from "./config/db.js";
 
 // Conectar a la base de datos
+
 conectarDB();
 
 const app = express();
@@ -20,14 +21,12 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Servir archivos estáticos desde la carpeta "public"
 app.use(express.static(path.join(__dirname, "public")));
 
 // Rutas API
 app.use("/api/products", productsRoutes);
 app.use("/api/carts", cartsRoutes);
 
-// Leer productos desde el archivo JSON (solo si usas archivo)
 const productosFilePath = path.join(__dirname, "data", "products.json");
 
 const readProducts = () => {

@@ -12,7 +12,6 @@ const conectarDB = async () => {
   }
 };
 
-// Definir el esquema y el modelo para productos
 const productSchema = new mongoose.Schema({
   nombre: String,
   descripcion: String,
@@ -26,6 +25,7 @@ const Product = mongoose.model('Product', productSchema);
 productSchema.plugin(mongoosePaginate);
 
 // Insertar los productos
+
 const productos = [
   {
     nombre: "Consola",
@@ -52,8 +52,8 @@ const productos = [
 
 const agregarProductos = async () => {
   try {
-    await conectarDB(); // Conectar a MongoDB
-    await Product.insertMany(productos); // Insertar múltiples productos
+    await conectarDB(); 
+    await Product.insertMany(productos); 
     console.log('Productos agregados a la base de datos');
   } catch (error) {
     console.error('Error al agregar productos:', error);
