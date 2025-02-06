@@ -7,7 +7,8 @@
     <title>{{title}}</title>
 </head>
 <style>
-    body{ font-family: "Fjalla One", serif;}
+    body { font-family: "Fjalla One", serif; }
+    #cart-count { font-weight: bold; color: red; }
 </style>
 <body>
     <h1>Productos en Tiempo Real</h1>
@@ -26,7 +27,6 @@
         {{/each}}
     </ul>
 
-    <!-- Paginación -->
     <div id="pagination" style="text-align: center; margin-top: 20px;">
         {{#if prevPage}}
             <a href="/products?page={{prevPage}}" style="padding: 10px 20px; background-color: teal; color: white;">Anterior</a>
@@ -35,6 +35,8 @@
             <a href="/products?page={{nextPage}}" style="padding: 10px 20px; background-color: teal; color: white;">Siguiente</a>
         {{/if}}
     </div>
+
+    <div>Carrito: <span id="cart-count">0</span> productos</div> 
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -49,7 +51,12 @@
             }
         });
 
-        // Actualizar la lista de productos
+        // Actualizar el contador del carrito
+        socket.on("cart-updated", (cart) => {
+            document.getElementById("cart-count").textContent = cart.length;
+        });
+
+        // Actualizar lista de productos
         socket.on("productos-actuales", (products) => {
             const productsList = document.getElementById("products-list");
             productsList.innerHTML = "";

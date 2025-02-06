@@ -8,7 +8,6 @@ router.get("/", async (req, res) => {
     
     const { page = 1, limit = 10 } = req.query; 
     
-    // Configuración de paginación
     const options = {
       page: parseInt(page),  
       limit: parseInt(limit),  
@@ -51,22 +50,36 @@ router.get("/:id", async (req, res) => {
 // Crear un nuevo producto
 router.post("/", async (req, res) => {
   try {
+ 
+    const productoExistente = await Product.findOne({ nombre: req.body.nombre });
+    if (productoExistente) {
+      return res.status(400).json({ mensaje: "El producto ya existe" });
+    }
+    
     const nuevoProducto = new Product(req.body);
     await nuevoProducto.save();
     res.status(201).json(nuevoProducto);
   } catch (error) {
-    res.status(400).json({ mensaje: "Error al crear producto", error });
+    res.status(400).json({ mensaje: "Error al crear producto", error: error.message });
   }
 });
+
 
 // Eliminar un producto
 router.delete("/:id", async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ mensaje: "ID no válido" });
+    }
+
     const productoEliminado = await Product.findByIdAndDelete(req.params.id);
-    if (!productoEliminado) return res.status(404).send("Producto no encontrado");
-    res.status(204).send();
+    if (!productoEliminado) {
+      return res.status(404).json({ mensaje: "Producto no encontrado" });
+    }
+    
+    res.status(200).json({ mensaje: "Producto eliminado correctamente" });
   } catch (error) {
-    res.status(500).json({ mensaje: "Error al eliminar producto" });
+    res.status(500).json({ mensaje: "Error al eliminar producto", error: error.message });
   }
 });
 

@@ -1,23 +1,37 @@
 [
   {
+    "nombre": "Red Dead Redemption 2",
+    "descripcion": "Juego PS5",
+    "precio": 55000,
+    "stock": 15,
+    "id": "ac24cb08-72ec-414c-b7ee-85ce4defd145"
+  },
+  {
     "nombre": "Consola",
-    "descripcion": "Nintendo Switch ",
-    "precio": 40000,
-    "stock": 3,
-    "id": "1737235982228"
+    "descripcion": "Nintendo Switch",
+    "precio": 255000,
+    "stock": 15,
+    "id": "fe22159d-9e5f-4d05-af4c-6adf727c52f9"
   },
   {
     "nombre": "Joystick",
-    "descripcion": "Mando de Xbox",
-    "precio": 23000,
+    "descripcion": "Dual Shock PS",
+    "precio": 150000,
     "stock": 3,
-    "id": "1737236386361"
+    "id": "5993fea2-1754-4974-a486-c04952b84154"
   },
   {
-    "nombre": "Red Dead",
-    "descripcion": "Juego",
-    "precio": 30000,
+    "nombre": "Escritorio",
+    "descripcion": "Modena",
+    "precio": 23111,
+    "stock": 1,
+    "id": "3cfd9a0f-50a3-4a97-9fe5-5fff152b11e0"
+  },
+  {
+    "nombre": "Consola",
+    "descripcion": "Nintendo",
+    "precio": 123123,
     "stock": 3,
-    "id": "1737418683258"
+    "id": "0d755f87-ba23-4155-9885-9237060925d2"
   }
 ]

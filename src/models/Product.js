@@ -1,5 +1,8 @@
 import mongoose from 'mongoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Conexión a la base de datos
 const conectarDB = async () => {
@@ -20,41 +23,25 @@ const productSchema = new mongoose.Schema({
   id: String,
 });
 
-// Aplicar el plugin de paginación al esquema
 productSchema.plugin(mongoosePaginate);
 
-// Definir el modelo
 const Product = mongoose.model('Product', productSchema);
 
-// Insertar los productos
-const productos = [
-  {
-    nombre: "Consola",
-    descripcion: "Nintendo Switch",
-    precio: 40000,
-    stock: 3,
-    id: "1737235982228"
-  },
-  {
-    nombre: "Joystick",
-    descripcion: "Mando de Xbox",
-    precio: 23000,
-    stock: 3,
-    id: "1737236386361"
-  },
-  {
-    nombre: "Red Dead",
-    descripcion: "Juego",
-    precio: 30000,
-    stock: 3,
-    id: "1737418683258"
-  }
-];
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+
+const obtenerProductosDesdeArchivo = () => {
+  const filePath = path.join(__dirname, '..', 'data', 'products.json'); 
+  const productos = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  return productos;
+};
 
 const agregarProductos = async () => {
   try {
-    await conectarDB(); 
-    await Product.insertMany(productos); 
+    await conectarDB();
+    const productos = obtenerProductosDesdeArchivo();
+    await Product.insertMany(productos);
     console.log('Productos agregados a la base de datos');
   } catch (error) {
     console.error('Error al agregar productos:', error);

@@ -7,11 +7,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap" rel="stylesheet">
 </head>
 <style>
-    body{ font-family: "Fjalla One", serif;}
+    body { font-family: "Fjalla One", serif; }
+    #cart-count { font-weight: bold; color: red; }
 </style>
 <body>
-    
     <h1>Lista de Productos</h1>
+    <ul>
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/cart">VER CARRITO</a></li>
+        <li>Carrito: <span id="cart-count">0</span> productos</li> <!-- Contador del carrito -->
+    </ul>
+    
     <ul id="products-list" style="display: flex; align-items: baseline; flex-wrap: wrap; justify-content: space-between;">
         {{#each products}}
         <li data-product-id="{{id}}">
@@ -19,10 +25,12 @@
             <p>{{descripcion}}</p>
             <p>Precio: ${{precio}}</p>
             <p>Cantidad: {{stock}}</p>
-            <button class="delete-btn">Eliminar</button>
+            <button class="add-to-cart-btn" data-product-id="{{id}}">Agregar al carrito</button>
         </li>
         {{/each}}
     </ul>
+    
+    <!-- Agregar Producto (Formulario) -->
     <form id="add-product-form">
         <label for="nombre">Nombre:</label>
         <input type="text" id="nombre" name="nombre"><br><br>
@@ -34,24 +42,41 @@
         <input type="number" id="stock" name="stock"><br><br>
         <button id="add-product-button">Agregar</button>
     </form>
+
     <a href="/real-time-products">
         <button style="background-color: teal; color: white; border: none; padding: 10px 20px; cursor: pointer;">
             Ver Productos en Tiempo Real
         </button>
+    </a>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
 
-        // Listener para eliminar 
+        // Listener para agregar al carrito
+        document.addEventListener("click", (event) => {
+            if (event.target.classList.contains("add-to-cart-btn")) {
+                const productId = event.target.dataset.productId;
+                socket.emit("add-to-cart", productId);
+                alert(`Producto ${productId} agregado al carrito.`);
+            }
+        });
+
+        // Actualizar carrito cuando se agregue un producto
+        socket.on("cart-updated", (cart) => {
+            document.getElementById("cart-count").textContent = cart.length;  // Actualiza el contador del carrito
+        });
+
+        // Listener para eliminar producto
         document.addEventListener("click", (event) => {
             if (event.target.classList.contains("delete-btn")) {
                 const productId = event.target.closest("li").dataset.productId;
                 console.log("Eliminando producto con ID:", productId);
-                socket.emit("delete-product", productId);
+                socket.emit("delete-product", productId); // Emitir evento al servidor
             }
         });
 
-        // Listener para agregar
+        // Listener para agregar producto (formulario)
         const addProductForm = document.getElementById("add-product-form");
         addProductForm.addEventListener("submit", (e) => {
             e.preventDefault();
@@ -70,13 +95,13 @@
             console.log("Producto agregado:", newProduct);
             socket.emit("add-product", newProduct);
 
-            addProductForm.reset(); // limpio formulario
+            addProductForm.reset(); // Limpia el formulario
         });
 
         // Ppara recibir la lista actualizada de productos
         socket.on("productos-actuales", (productos) => {
             const productsList = document.getElementById("products-list");
-            productsList.innerHTML = ""; // limpio la lista
+            productsList.innerHTML = ""; // Limpia la lista
             productos.forEach((producto) => {
                 const li = document.createElement("li");
                 li.dataset.productId = producto.id;
@@ -93,4 +118,3 @@
     </script>
 </body>
 </html>
-
