@@ -6,21 +6,21 @@ import { fileURLToPath } from 'url';
 
 // Conexión a la base de datos
 const conectarDB = async () => {
-  try {
-    await mongoose.connect("mongodb+srv://facundobuitrago:coder@cluster0.3te2r.mongodb.net/baseDeDatos?retryWrites=true&w=majority");
-    console.log("Conexión exitosa a MongoDB");
-  } catch (error) {
-    console.error("Error al conectar con MongoDB:", error);
-    process.exit(1);
-  }
+    try {
+        await mongoose.connect("mongodb+srv://facundobuitrago:coder@cluster0.3te2r.mongodb.net/baseDeDatos?retryWrites=true&w=majority");
+        console.log("Conexión exitosa a MongoDB");
+    } catch (error) {
+        console.error("Error al conectar con MongoDB:", error);
+        process.exit(1);
+    }
 };
 
 const productSchema = new mongoose.Schema({
-  nombre: String,
-  descripcion: String,
-  precio: Number,
-  stock: Number,
-  id: String,
+    nombre: String,
+    descripcion: String,
+    precio: Number,
+    stock: Number,
+    // id: String, <- Elimina esta línea
 });
 
 productSchema.plugin(mongoosePaginate);
@@ -32,20 +32,20 @@ const __dirname = path.dirname(__filename);
 
 
 const obtenerProductosDesdeArchivo = () => {
-  const filePath = path.join(__dirname, '..', 'data', 'products.json'); 
-  const productos = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  return productos;
+    const filePath = path.join(__dirname, '..', 'data', 'products.json');
+    const productos = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    return productos;
 };
 
 const agregarProductos = async () => {
-  try {
-    await conectarDB();
-    const productos = obtenerProductosDesdeArchivo();
-    await Product.insertMany(productos);
-    console.log('Productos agregados a la base de datos');
-  } catch (error) {
-    console.error('Error al agregar productos:', error);
-  }
+    try {
+        await conectarDB();
+        const productos = obtenerProductosDesdeArchivo();
+        await Product.insertMany(productos);
+        console.log('Productos agregados a la base de datos');
+    } catch (error) {
+        console.error('Error al agregar productos:', error);
+    }
 };
 
 agregarProductos();

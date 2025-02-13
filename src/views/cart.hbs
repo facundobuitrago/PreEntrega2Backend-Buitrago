@@ -1,14 +1,14 @@
 <h1>Carrito de Compras</h1>
 
 {{#if cart.length}}
-  <ul>
-    {{#each cart}}
-      <li>{{this.nombre}} - ${{this.precio}}</li> 
-    {{/each}}
-  </ul>
-  <p>Total: ${{totalPrice cart}}</p> 
+    <ul>
+        {{#each cart}}
+            <li>{{this.nombre}} - ${{this.precio}}</li>
+        {{/each}}
+    </ul>
+    <p>Total: ${{totalPrice cart}}</p> <--- Llama al helper totalPrice
 {{else}}
-  <p>No hay productos en el carrito.</p>
+    <p>No hay productos en el carrito.</p>
 {{/if}}
 
 <p>Productos en el carrito: <span id="cart-count" style="color: red;">{{cart.length}}</span></p>

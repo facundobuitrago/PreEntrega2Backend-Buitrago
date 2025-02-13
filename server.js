@@ -4,27 +4,22 @@ import { fileURLToPath } from "url";
 import morgan from "morgan";
 import http from "http";
 import { Server } from "socket.io";
-import fs from "fs";
 import handlebars from "express-handlebars";
 import session from "express-session";
 import productsRoutes from "./src/routes/products.js";
 import cartsRoutes from "./src/routes/carts.js";
 import conectarDB from "./config/db.js";
-import { v4 as uuidv4 } from "uuid";
 import Product from './src/models/Product.js';
 
-// Configurar __dirname en ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Conectar a la base de datos
 conectarDB();
 
 const app = express();
-const server = http.createServer(app); 
-const io = new Server(server); 
+const server = http.createServer(app);
+const io = new Server(server);
 
-// Configurar sesión
 app.use(
   session({
     secret: "coder",
@@ -33,97 +28,14 @@ app.use(
   })
 );
 
-// Leer productos desde el archivo
-const productosFilePath = path.join(__dirname, "src", "data", "products.json");
-
-const readProducts = () => {
-  try {
-    const data = fs.readFileSync(productosFilePath, "utf8");
-    return JSON.parse(data);
-  } catch (error) {
-    console.error("Error al leer el archivo de productos", error);
-    return [];
-  }
-};
-
-const saveProducts = (productos) => {
-  try {
-    fs.writeFileSync(productosFilePath, JSON.stringify(productos, null, 2));
-  } catch (error) {
-    console.error("Error al guardar el archivo de productos", error);
-  }
-};
-
-// Manejar la conexión de clientes con Socket.io
-io.on("connection", (socket) => {
-  console.log("Nuevo cliente conectado");
-
-  // Emitir la lista de productos actuales
-  socket.emit("productos-actuales", readProducts());
-
-  // Manejar el evento de agregar un producto
-  socket.on("add-product", (newProduct) => {
-    if (!newProduct || !newProduct.nombre || !newProduct.precio) {
-      return socket.emit("error", "Producto incompleto");
-    }
-    
-    function createProduct(producto) {
-      const li = document.createElement("li");
-      li.id = `product-${producto.id}`;
-      li.className = "collection-item";
-      li.innerHTML = `
-        <h2>${producto.nombre}</h2>
-        <p>${producto.descripcion}</p>
-        <p>Precio: $${producto.precio}</p>
-        <p>Stock: ${producto.stock}</p>
-        <button class="delete-btn">Eliminar</button>
-      `;
-      
-      // Añadir evento al botón de eliminar
-      const deleteButton = li.querySelector(".delete-btn");
-      deleteButton.addEventListener("click", () => {
-        socket.emit("delete-product", producto.id); 
-      });
-    
-      return li;
-    }
-    
-    const productos = readProducts();
-    newProduct.id = uuidv4();
-    productos.push(newProduct);
-    saveProducts(productos);
-    io.emit("productos-actuales", productos);
-  });
-
-  // Manejar el evento de eliminar un producto
-  socket.on("delete-product", (productId) => {
-    if (!productId) {
-      return socket.emit("error", "ID de producto no proporcionado");
-    }
-
-    let productos = readProducts();
-    productos = productos.filter((producto) => producto.id !== productId);
-    saveProducts(productos);
-    io.emit("productos-actuales", productos);
-  });
-
-  // Desconexión del cliente
-  socket.on("disconnect", () => {
-    console.log("Cliente desconectado");
-  });
-});
-
-// Middleware
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
-// Rutas API
 app.use("/api/products", productsRoutes);
 app.use("/api/carts", cartsRoutes);
 
-// Ruta principal
 app.get("/", async (req, res) => {
   try {
     const productos = await Product.find();
@@ -137,42 +49,136 @@ app.get("/", async (req, res) => {
   }
 });
 
-// Ruta para mostrar productos en tiempo real
-app.get("/real-time-products", (req, res) => {
-  res.render("realTimeProducts", { title: "Productos en Tiempo Real", products: readProducts() });
-});
-
-// Ruta para agregar productos al carrito
-app.post("/add-to-cart", (req, res) => {
-  const product = req.body;
-  if (!req.session.cart) {
-    req.session.cart = [];
+app.get("/real-time-products/", async (req, res) => {
+  try {
+    const productos = await Product.find().lean();
+    res.render("realTimeProducts", { title: "Productos en Tiempo Real", products: productos });
+  } catch (error) {
+    console.error("Error al obtener productos:", error);
+    res.status(500).send("Error al cargar productos");
   }
-  req.session.cart.push(product);
-  res.redirect("/");
 });
 
-// Ruta para mostrar el carrito
+app.post("/add-to-cart", async (req, res) => {
+  const productId = req.body.productId;
+  try {
+    const product = await Product.findById(productId).lean();
+    if (!product) {
+      return res.status(404).send("Producto no encontrado");
+    }
+
+    if (!req.session.cart) {
+      req.session.cart = [];
+    }
+
+    const existingProduct = req.session.cart.find(item => item._id === product._id);
+    if (existingProduct) {
+      existingProduct.quantity = (existingProduct.quantity || 1) + 1;
+    } else {
+      product.quantity = 1;
+      req.session.cart.push(product);
+    }
+
+    res.redirect("/cart");
+  } catch (error) {
+    console.error("Error al agregar al carrito:", error);
+    res.status(500).send("Error al agregar al carrito");
+  }
+});
+
 app.get("/cart", (req, res) => {
-  res.render("cart", { cart: req.session.cart || [] });
+  console.log("Datos del carrito en la sesión:", req.session.cart);
+
+  res.render("cart", {
+      cart: req.session.cart || [], 
+      totalPrice: (cart) => { 
+          let total = 0;
+          if (cart) {
+              cart.forEach(item => {
+                  total += item.precio;
+              });
+          }
+          return total;
+      }
+  });
 });
 
-// Configuración de Handlebars
 app.engine(
   "hbs",
   handlebars.engine({
     extname: ".hbs",
     defaultLayout: "main.hbs",
     runtimeOptions: {
-      allowProtoPropertiesByDefault: true,  
-      allowProtoMethodsByDefault: true,    
+      allowProtoPropertiesByDefault: true,
+      allowProtoMethodsByDefault: true,
     }
   })
 );
 app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "src", "views"));
 
-// Configuración del puerto
+io.on("connection", (socket) => {
+  console.log("Nuevo cliente conectado");
+
+  (async () => {
+    const productos = await Product.find().lean();
+    socket.emit("productos-actuales", productos);
+  })();
+
+  const createProductElement = (producto) => {
+    const li = document.createElement("li");
+    li.dataset.productId = producto._id;
+    li.className = "product";
+    li.innerHTML = `
+      <h2>${producto.nombre}</h2>
+      <p>${producto.descripcion}</p>
+      <p>Precio: $${producto.precio}</p>
+      <p>Stock: ${producto.stock}</p>
+      <button class="add-to-cart-btn" data-product-id="${producto._id}">Agregar</button>
+      <button class="delete-btn" data-product-id="${producto._id}">Eliminar</button>
+    `;
+    return li;
+  };
+
+  socket.on("add-product", async (newProduct) => {
+    try {
+      const product = new Product(newProduct);
+      await product.save();
+      const productos = await Product.find().lean();
+      io.emit("productos-actuales", productos);
+    } catch (error) {
+      console.error("Error al agregar producto:", error);
+      socket.emit("error", "Error al agregar producto");
+    }
+  });
+
+ // Manejar el evento de eliminar un producto
+ socket.on("delete-product", async (productId) => {
+  try {
+      console.log("Eliminando producto con ID:", productId); 
+      console.log(typeof productId); 
+
+      const result = await Product.deleteOne({ _id: productId });
+
+      console.log("Resultado de la eliminación:", result); 
+
+      if (result.deletedCount === 0) {
+          console.log("No se encontró el producto para eliminar:", productId);
+          return;
+      }
+
+      const productos = await Product.find().lean();
+      io.emit("productos-actuales", productos); 
+  } catch (error) {
+      console.error("Error al eliminar producto:", error); 
+      socket.emit("error", "Error al eliminar producto");
+  }
+});
+  socket.on("disconnect", () => {
+    console.log("Cliente desconectado");
+  });
+});
+
 const port = process.env.PORT || 3000;
 server.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
